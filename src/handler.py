@@ -1,6 +1,7 @@
 import boto3
 import json
 from boto3.dynamodb.conditions import Attr
+import datetime
 
 print('Loading function')
 dynamo = boto3.client('dynamodb')
@@ -61,9 +62,12 @@ def doExpired(payload):
     dynamo = boto3.resource('dynamodb')
     table = dynamo.Table('Options')
     #TODO fix date
-    now = "2019/08/28"
+
+    now = datetime.datetime.now()
+    snow = now.strftime("%Y/%m/%d")
+
     r = table.scan(TableName=table_name,
-                    FilterExpression=Attr('expirationDate').lt(now))
+                    FilterExpression=Attr('expirationDate').lt(snow))
     #return respond(None, "{'message:', 'get expired'}")
-    return respond(None, r)
+    return respond(None, r["Items"])
     #TODO error handling

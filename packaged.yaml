@@ -1,40 +1,66 @@
 AWSTemplateFormatVersion: '2010-09-09'
-Transform: AWS::Serverless-2016-10-31
-Description: 'sam-app
-
-  Sample SAM Template for sam-app
+Description: 'options v2 app
 
   '
 Globals:
   Function:
     Timeout: 3
+Outputs:
+  ExpiredOptionsAPI:
+    Description: API Gateway endpoint URL for Prod stage for Expired Options function
+    Value:
+      Fn::Sub: https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/optionsExpired/
+  ExpiredOptionsFunction:
+    Description: Expired Options
+    Value:
+      Fn::GetAtt:
+      - ExpiredOptionsFunction
+      - Arn
+  ExpiredOptionsFunctionIamRole:
+    Description: Implicit IAM Role created for expired options function
+    Value:
+      Fn::GetAtt:
+      - ExpiredOptionsFunctionRole
+      - Arn
+  OptionsAPI:
+    Description: API Gateway endpoint URL for Prod stage for Options function
+    Value:
+      Fn::Sub: https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/options/
+  OptionsFunction:
+    Description: options v2 Lambda Function ARN
+    Value:
+      Fn::GetAtt:
+      - OptionsFunction
+      - Arn
+  OptionsFunctionIamRole:
+    Description: Implicit IAM Role created for options v2 function
+    Value:
+      Fn::GetAtt:
+      - OptionsFunctionRole
+      - Arn
 Resources:
-  HelloWorldFunction:
-    Type: AWS::Serverless::Function
+  ExpiredOptionsFunction:
     Properties:
-      CodeUri: s3://larsbucket1/1cd566adf8647018f05724ca0a96eee6
+      CodeUri: s3://larsbucket1/07fffc5418129d90d92d06c6c407002c
+      Events:
+        Options:
+          Properties:
+            Method: get
+            Path: /optionsExpired
+          Type: Api
+      Handler: handler.expiredOptions_handler
+      Runtime: python3.7
+    Type: AWS::Serverless::Function
+  OptionsFunction:
+    Properties:
+      CodeUri: s3://larsbucket1/2b2404d02722b1db1236278050ae2843
+      Events:
+        Options:
+          Properties:
+            Method: get
+            Path: /options
+          Type: Api
       Handler: handler.lambda_handler
       Runtime: python3.7
-      Events:
-        HelloWorld:
-          Type: Api
-          Properties:
-            Path: /hello
-            Method: get
-Outputs:
-  HelloWorldApi:
-    Description: API Gateway endpoint URL for Prod stage for Hello World function
-    Value:
-      Fn::Sub: https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/hello/
-  HelloWorldFunction:
-    Description: Hello World Lambda Function ARN
-    Value:
-      Fn::GetAtt:
-      - HelloWorldFunction
-      - Arn
-  HelloWorldFunctionIamRole:
-    Description: Implicit IAM Role created for Hello World function
-    Value:
-      Fn::GetAtt:
-      - HelloWorldFunctionRole
-      - Arn
+    Type: AWS::Serverless::Function
+Transform: AWS::Serverless-2016-10-31
