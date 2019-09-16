@@ -32,6 +32,18 @@ Resources:
           Properties:
             Path: /optionsExpired
             Method: get
+  DeleteOptionsFunction:
+    Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
+    Properties:
+      CodeUri: src/
+      Handler: handler.deleteOptions_handler
+      Runtime: python3.7
+      Events:
+        Options:
+          Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
+          Properties:
+            Path: /optionsDelete/{optionsKey}
+            Method: delete
 
 Outputs:
   OptionsAPI:
@@ -53,3 +65,13 @@ Outputs:
   ExpiredOptionsFunctionIamRole:
     Description: "Implicit IAM Role created for expired options function"
     Value: !GetAtt ExpiredOptionsFunctionRole.Arn
+
+  DeleteOptionsAPI:
+    Description: "API Gateway endpoint URL for Prod stage for Expired Options function"
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/optionsDelete/{optionsKey}"
+  DeleteOptionsFunction:
+    Description: "Delete Options"
+    Value: !GetAtt DeleteOptionsFunction.Arn
+  DeleteOptionsFunctionIamRole:
+    Description: "Implicit IAM Role created for expired options function"
+    Value: !GetAtt DeleteOptionsFunctionRole.Arn

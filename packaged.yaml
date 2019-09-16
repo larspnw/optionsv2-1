@@ -6,6 +6,22 @@ Globals:
   Function:
     Timeout: 3
 Outputs:
+  DeleteOptionsAPI:
+    Description: API Gateway endpoint URL for Prod stage for Expired Options function
+    Value:
+      Fn::Sub: https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/optionsDelete/{optionsKey}
+  DeleteOptionsFunction:
+    Description: Delete Options
+    Value:
+      Fn::GetAtt:
+      - DeleteOptionsFunction
+      - Arn
+  DeleteOptionsFunctionIamRole:
+    Description: Implicit IAM Role created for expired options function
+    Value:
+      Fn::GetAtt:
+      - DeleteOptionsFunctionRole
+      - Arn
   ExpiredOptionsAPI:
     Description: API Gateway endpoint URL for Prod stage for Expired Options function
     Value:
@@ -39,9 +55,21 @@ Outputs:
       - OptionsFunctionRole
       - Arn
 Resources:
+  DeleteOptionsFunction:
+    Properties:
+      CodeUri: s3://larsbucket1/279a96ae652b33c27d438655b7f219ac
+      Events:
+        Options:
+          Properties:
+            Method: delete
+            Path: /optionsDelete/{optionsKey}
+          Type: Api
+      Handler: handler.deleteOptions_handler
+      Runtime: python3.7
+    Type: AWS::Serverless::Function
   ExpiredOptionsFunction:
     Properties:
-      CodeUri: s3://larsbucket1/07fffc5418129d90d92d06c6c407002c
+      CodeUri: s3://larsbucket1/9f36189b31267c0819953ad49920a243
       Events:
         Options:
           Properties:
@@ -53,7 +81,7 @@ Resources:
     Type: AWS::Serverless::Function
   OptionsFunction:
     Properties:
-      CodeUri: s3://larsbucket1/2b2404d02722b1db1236278050ae2843
+      CodeUri: s3://larsbucket1/71aa8b60fa93e0adbffd8ad9745100cb
       Events:
         Options:
           Properties:

@@ -6,7 +6,6 @@ import datetime
 print('Loading function')
 dynamo = boto3.client('dynamodb')
 table_name = "Options"
-#table_name = os.environ['TABLE_NAME']
 
 def respond(err, res=None):
     return {
@@ -16,6 +15,22 @@ def respond(err, res=None):
             'Content-Type': 'application/json',
         },
     }
+
+def respond2(statusCode, res=None):
+    return {
+        'statusCode': statusCode,
+        'body': json.dumps(res),
+        'headers': {
+            'Content-Type': 'application/json',
+        },
+    }
+
+def deleteOptions_handler(event, context):
+    #print("Received event: " + json.dumps(event, indent=2))
+    #evt = json.dumps(event, indent=2)
+    key = event['pathParameters']['optionsKey']
+    return doDelete(key)
+    #return respond(None, "{'message:', 'lars was here'}")
 
 def expiredOptions_handler(event, context):
     print("Received event: " + json.dumps(event, indent=2))
@@ -71,3 +86,19 @@ def doExpired(payload):
     #return respond(None, "{'message:', 'get expired'}")
     return respond(None, r["Items"])
     #TODO error handling
+
+def doDelete(key):
+    #print("doDelete enter ", key)
+    dynamo = boto3.resource('dynamodb')
+    table = dynamo.Table('Options')
+    try:
+        r = table.delete_item(Key={"nameTypePrice": key})
+        print("doDelete r: ", r)
+    except Exception as err:
+        print("doDelete: error: ", err )
+        return respond2(404, "{'message:', 'error: " + str(err) + "'}")
+
+    #did this work?
+    #return 200 on success and return key
+    #return 404 if failed and the key + error message
+    return respond2(200, "{'message:', 'Delete successful for " + key + "'}")
